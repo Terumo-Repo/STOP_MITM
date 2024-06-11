@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Define expected IPs, MAC address and network SSID 
+router_ip="___.___.__._"		# Replace with your actual router IP
+dns_ip="__.__.__.__" 			# Replace with your actual DNS IP
+router_MAC="__:__:__:__:__:__" 	# Replace with your actual router MAC address
+expected_ssid="______________" 	# Replace with your actual network SSID
+
+while true
+do
+    DNS_test=$(grep "nameserver" /etc/resolv.conf | awk '{print $2}')
+	ARP_test=$(arp -n $router_ip | tail -1 | awk '{print $3}')
+	SSID_test=$(iwgetid -r)
+	if [ "$DNS_test" != "$dns_ip" ]; then
+		printf "\a"		
+		echo "WARNING: Possible DNS attack!!! Please stop any activity and contact IT help!"
+		echo "Press any key to continue..."
+		read -n 1
+	fi
+	if [ "$ARP_test" != "$router_MAC" ]; then
+		printf "\a"
+		echo "WARNING: Possible ARP attack!!! Please stop any activity and contact IT help!"
+		echo "Press any key to continue..."
+		read -n 1
+	fi
+	if [ "$SSID_test" != "$expected_ssid" ]; then
+		printf "\a"
+		echo "WARNING: Connected to different network!!! Please stop any activity and contact IT help!"
+		echo "Press any key to continue..."
+		read -n 1
+	fi
+	sleep 30
+done
