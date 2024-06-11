@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Define expected values
+router_ip="___.___._._" 	# Replace with your actual router IP
+dns_ip="__.__.__.__"		# Replace with your actual DNS IP
+router_MAC="__:__:__:__:__:__"	# Replace with your actual router MAC address
+expected_ssid="______________"	# Replace with your actual network SSID
+
+while true; do
+    DNS_test=$(scutil --dns | grep 'nameserver\[[0-9]*\]' | awk '{print $3}' | head -n 1)
+    ARP_test=$(arp -an | grep "$router_ip" | awk '{print $4}')
+    current_ssid=$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | grep SSID | awk '{print $2}')
+    current_bssid=$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | grep BSSID | awk '{print $2}')
+
+    if [ "$DNS_test" != "$dns_ip" ]; then
+        printf "\a"
+        echo "WARNING: Possible DNS attack!!!"
+        echo "Press any key to continue..."
+        read -n 1
+    fi
+
+    if [ "$ARP_test" != "$router_MAC" ]; then
+        printf "\a"
+        echo "WARNING: Possible ARP attack!!!"
+        echo "Press any key to continue..."
+        read -n 1
+    fi
+
+    if [ "$current_ssid" != "$expected_ssid" ]; then
+        printf "\a"
+        echo "WARNING: Connected to a different SSID!"
+        echo "Press any key to continue..."
+        read -n 1
+    fi
+
+    if [ "$current_bssid" != "$router_MAC" ]; then
+        printf "\a"
+        echo "WARNING: Connected to a different BSSID!"
+        echo "Press any key to continue..."
+        read -n 1
+    fi
+
+    sleep 30
+done
