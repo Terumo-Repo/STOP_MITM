@@ -1,0 +1,60 @@
+@echo off
+setlocal enabledelayedexpansion
+
+rem Define expected values
+set "router_ip=___.___._._"
+set "dns_ip=__.__.__.__"
+set "router_MAC=__-__-__-__-__-__"
+set "expected_ssid=______________"
+
+rem Infinite loop to continuously check DNS and ARP
+:loop
+
+rem Extract the current DNS IP
+for /f "tokens=3" %%i in ('nslookup %router_ip% ^| findstr /i "Address:"') do (
+    set "DNS_test=%%i"
+)
+
+rem Extract the current router MAC address using ARP
+for /f "tokens=1,2,3,4,5,6" %%a in ('arp -a %router_ip% ^| findstr /i "%router_ip%"') do (
+    set "ARP_test=%%a-%%b-%%c-%%d-%%e-%%f"
+)
+
+rem Check if the current DNS IP is different from the expected one
+if "%DNS_test%" neq "%dns_ip%" (
+    echo WARNING: Possible DNS attack!!! Please stop any activity and contact IT help!
+    echo Press any key to continue...
+    pause > nul
+)
+
+rem Check if the current router MAC address is different from the expected one
+if "%ARP_test%" neq "%router_MAC%" (
+    echo WARNING: Possible ARP attack!!! Please stop any activity and contact IT help!
+    echo Press any key to continue...
+    pause > nul
+)
+
+rem Check SSID and BSSID
+for /f "tokens=2 delims=:" %%i in ('netsh wlan show interfaces ^| findstr /i "SSID" ^| findstr /v "BSSID"') do (
+    set "current_ssid=%%i"
+)
+set "current_ssid=%current_ssid:~1%"
+for /f "tokens=2 delims=:" %%i in ('netsh wlan show interfaces ^| findstr /i "BSSID"') do (
+    set "current_bssid=%%i"
+)
+set "current_bssid=%current_bssid:~1%"
+if "%current_ssid%" neq "%expected_ssid%" (
+    echo WARNING: Connected to a different SSID!
+    echo Press any key to continue...
+    pause > nul
+)
+if "%current_bssid%" neq "%router_MAC%" (
+    echo WARNING: Connected to a different BSSID!
+    echo Press any key to continue...
+    pause > nul
+)
+
+rem Sleep for a while to avoid continuous checking
+timeout /t 30 /nobreak > nul
+
+goto loop
