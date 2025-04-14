@@ -8,8 +8,8 @@ The goal is to be a free, easy to setup, multi-platform (Linux, Windows and MacO
 - DNS poisoning
 - ARP poisoning
 - Rogue DHCP Servers
-While no solution is entirely secure, this program helps minimize the risk of these attacks.
 
+While no solution is entirely secure, this program helps minimize the risk of these attacks.
 
 ## Why a ".txt" file?
 MITM_Stop is provided as a ".txt" file and not as an ".exe" to be readable and editable by anyone! It is also not provided as a ".bat" file because most antivirus programs distrust ".bat" files. This way, the script is both trustworthy (you can read the full code and verify it has no hidden functions) and easily editable on any computer.
